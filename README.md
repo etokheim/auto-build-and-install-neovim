@@ -9,3 +9,9 @@ This script automatically builds, installs and configures Neovim. It's made for 
  5. Installs vim-plug (a plugin manager for vim/neovim)
  6. Configures Neovim (Configuration file: https://github.com/etokheim/nvim-config.git)
 
+## How to run
+ 1. Clone this repository
+ 2. Run the install.sh:
+    ```sh
+    ./install.sh
+    ```
