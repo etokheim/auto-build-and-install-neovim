@@ -126,6 +126,7 @@ if [ -d ./neovim/.git ]; then
 else
 	section "Cloning neovim's git repository"
 	git clone https://github.com/neovim/neovim | while read -r line; do formatter "$line"; done
+	rebuild=true
 	closeSection "Cloned Neovim's git repository"
 
 	section "Selecting the stable branch"
