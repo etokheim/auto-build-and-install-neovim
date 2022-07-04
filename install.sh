@@ -1,3 +1,58 @@
+#!/bin/bash
+
+# Dependencies
+source ./libcolor.bash
+
+# Make the user confirm an action.
+# Custom text can be passed in as the first parameter.
+confirm() {
+	confirmText="${bold}${cyan}Are you sure? [Y/n]${resetall}"
+
+	# If first parameter contains a non-empty string, use that instead
+	if [[ ! -z "$1" ]]
+	then
+		confirmText=$1
+	fi
+
+	read -r -p "$(echo -e "$confirmText") " response
+	response=${response,,}    # tolower
+
+	# If response is empty, contais yes or y (case insensitive), well proceed
+	if [[ "$response" =~ ^(yes|y)$ ]] || [[ -z "$response" ]]
+	then
+		echo -e "Then what are we waiting for?! Let's goo!"
+	else
+		echo -e "Then we'll stop before we do something we'll both regret."
+		exit
+	fi
+}
+
+echo -e "${green}
+███    ██ ███████  ██████  ██    ██ ██ ███    ███ 
+████   ██ ██      ██    ██ ██    ██ ██ ████  ████ 
+██ ██  ██ █████   ██    ██ ██    ██ ██ ██ ████ ██ 
+██  ██ ██ ██      ██    ██  ██  ██  ██ ██  ██  ██ 
+██   ████ ███████  ██████    ████   ██ ██      ██
+
+A U T O M A T I C    I N S T A L L    S C R I P T
+
+${resetall}"
+
+echo -e "${bold}This script will make the following changes to your system:${resetall}
+${darkgrey}
+1. apt-get update
+2. Install git and build tools needed for compiling Neovim
+3. Compile and install the stable version of Neovim
+4. Install vim-plug, a plugin manager for Vim/Neovim
+5. Download my init.vim file as a template for you.
+   - This init.vim file is in it's own git repository which is
+     cloned into the auto-installer project. Then the file is
+     symlinked into ~/.config/nvim.${resetall}
+"
+confirm "${bold}Sounds good? [Y/n]${resetall}"
+
+exit
+
 echo ""
 echo ""
 echo "Installing build tools"
@@ -53,7 +108,7 @@ echo "Successfully installed if build type is printed below:"
 echo ""
 echo ""
 echo "Things to do:"
-echo "1. Re-source your PATH. Ie.: `source ~/.bashrc`"
-echo "2. Open neovim and run `:PlugInstall` to install the plugins"
+echo "1. Re-source your PATH. Ie.: 'source ~/.bashrc'"
+echo "2. Open neovim and run ':PlugInstall' to install the plugins"
 echo "3. Delete the ./neovim folder if you don't need it"
 echo "---"
