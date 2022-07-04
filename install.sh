@@ -90,14 +90,13 @@ else
 	exit
 fi
 
-if [ "$EUID" -ne 0 ]
-then
+if [ "$EUID" -ne 0 ]; then
 	echo -e "${green}╭───────────────────────────────────────╮"
 	echo -e "│  ⚠️ This script requires sudo to run  │"
-	echo -e "╰───────────────────────────────────────╯${resetall}"
+	echo -e "├───────────────────────────────────────╯"
+	echo -e "│${resetall}"
 
-	sudo echo -e "${green}✅ Sudo permissions"
-	echo "---"
+	sudo echo -e "${green}╰  ✅ Sudo permissions"
 fi
 
 section "Update"
