@@ -179,13 +179,22 @@ sh -c 'curl --no-progress-meter -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim
 
 closeSection "Configuration done!"
 
-section "Successfully installed if build type is printed below"
-verifyMessage=./neovim/build/bin/nvim --version | grep ^Build
-closeSection "$verifyMessage"
+section "Verifying installation"
+verifyMessage=$(./neovim/build/bin/nvim --version | grep ^Build)
+
+if [[ "$verifyMessage" == *"Build type: Release"* ]]; then
+	closeSection "Successfully installed!"
+else
+	formatter "Verify message should have contained 'Build type: Release'."
+	formatter "Instead it contained:"
+	formatter "${verifyMessage}"
+	closeSection "${red}Installation was not successfull!${resetall}"
+fi
 
 section "Things to do:"
 formatter "1. Re-source your PATH. Ie.: 'source ~/.bashrc'"
-formatter "2. Open neovim and run ':PlugInstall' to install the plugins"
+formatter "2. Open neovim (ie.: nvim [file]) and run ':PlugInstall' to install the plugins"
 formatter ""
 formatter "${italic}Don't delete this folder, as it now contains the Neovim configuration file (init.vim), which is symlinked to the correct location"
 closeSection "Have a nice day!"
+
