@@ -30,6 +30,31 @@ confirm() {
 	fi
 }
 
+section() {
+	spacers=""
+
+	for (( i=0; i< ${#1}+4; i++ ))
+	do
+		spacers="$spacers─"
+	done
+
+	echo -e "${resetall}${green}"
+	echo -e ""
+	echo -e "╭$spacers╮"
+	echo -e "│  $1  │"
+	echo -e "├$spacers╯"
+	echo -e "│"
+}
+
+closeSection() {
+	echo -e "${green}│"
+	echo -e "╰  ✅ $1"
+}
+
+formatter() {
+	echo -e "${green}│   ${darkgrey}$1"
+}
+
 echo -e "${green}
 ███    ██ ███████  ██████  ██    ██ ██ ███    ███ 
 ████   ██ ██      ██    ██ ██    ██ ██ ████  ████ 
@@ -54,62 +79,63 @@ ${darkgrey}
 "
 confirm "${bold}Sounds good? [Y/n]${resetall}"
 
-echo ""
-echo ""
-echo "Installing build tools"
-echo "---"
-sudo apt-get update -y
-sudo apt-get install -y ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip curl git
+if [ "$EUID" -ne 0 ]
+then
+	echo -e "${green}╭───────────────────────────────────────╮"
+	echo -e "│  ⚠️ This script requires sudo to run  │"
+	echo -e "╰───────────────────────────────────────╯${resetall}"
 
-echo ""
-echo ""
-echo "Cloning neovim's git repository"
-echo "---"
-git clone https://github.com/neovim/neovim
+	sudo echo -e "${green}✅ Sudo permissions"
+	echo "---"
+fi
+
+section "Update"
+sudo apt-get update -y | while read -r line; do formatter "$line"; done
+closeSection "Updated"
+
+section "Install build tools"
+sudo apt-get install -y ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip curl git | while read -r line; do formatter "$line"; done
+closeSection "Installed build tools"
+
+section "Cloning neovim's git repository"
+git clone https://github.com/neovim/neovim | while read -r line; do formatter "$line"; done
+closeSection "Cloned Neovim's git repository"
 
 cd neovim
 
-echo ""
-echo ""
-echo "Selecting the stable branch"
-echo "---"
-git checkout stable
+section "Selecting the stable branch"
+git checkout stable | while read -r line; do formatter "$line"; done
+closeSection "Selected stable branch"
 
-echo ""
-echo ""
-echo "Compiling the release version of neovim"
-echo "---"
+section "Compiling the release version of neovim"
 # Set the type of build (Release/Debug/RelWIthDebInfo)
 # -j flag shouldn't be added if ninja is installed
-make CMAKE_BUILD_TYPE=Release
+make CMAKE_BUILD_TYPE=Release | while read -r line; do formatter "$line"; done
+closeSection "Compile successfull"
 
-echo ""
-echo ""
-echo "Installing to /usr/local"
-echo "---"
-sudo make install
+section "Installing to /usr/local"
+sudo make install | while read -r line; do formatter "$line"; done
+closeSection "Installation completed without errors"
 
-echo ""
-echo ""
-echo "Configuring Neovim"
-echo "---"
-git clone https://github.com/etokheim/nvim-config.git
+
+section "Configuring Neovim"
+git clone https://github.com/etokheim/nvim-config.git | while read -r line; do formatter "$line"; done
+
 mkdir -p ~/.config/nvim
 cp nvim-config/init.vim ~/.config/nvim/
 
 # Install vim-plug (plugin manager for vim/neovim)
 sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+closeSection "Configuration done!"
 
-echo ""
-echo ""
-echo "Done!"
-echo "Successfully installed if build type is printed below:"
-./build/bin/nvim --version | grep ^Build
-echo ""
-echo ""
-echo "Things to do:"
-echo "1. Re-source your PATH. Ie.: 'source ~/.bashrc'"
-echo "2. Open neovim and run ':PlugInstall' to install the plugins"
-echo "3. Delete the ./neovim folder if you don't need it"
-echo "---"
+section "Successfully installed if build type is printed below"
+verifyMessage=./build/bin/nvim --version | grep ^Build
+closeSection "$verifyMessage"
+
+section "Things to do:"
+formatter "1. Re-source your PATH. Ie.: 'source ~/.bashrc'"
+formatter "2. Open neovim and run ':PlugInstall' to install the plugins"
+formatter ""
+formatter "${italic}Don't delete this folder, as it now contains the Neovim configuration file (init.vim), which is symlinked to the correct location"
+closeSection "Have a nice day!"
