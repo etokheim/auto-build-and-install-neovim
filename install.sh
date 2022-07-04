@@ -6,6 +6,10 @@ set -e
 # Dependencies
 source ./libcolor.bash
 
+# Config
+initPath=~/.config/nvim/init.vim
+newInitPath=$(pwd)/nvim-config/init.vim
+
 # Make the user confirm an action.
 # Custom text can be passed in as the first parameter.
 confirm() {
@@ -23,10 +27,9 @@ confirm() {
 	# If response is empty, contais yes or y (case insensitive), well proceed
 	if [[ "$response" =~ ^(yes|y)$ ]] || [[ -z "$response" ]]
 	then
-		echo -e "Then what are we waiting for?! Let's goo!"
+		confirmValue=true
 	else
-		echo -e "Then we'll stop before we do something we'll both regret."
-		exit
+		confirmValue=false
 	fi
 }
 
@@ -77,7 +80,15 @@ ${darkgrey}
      cloned into the auto-installer project. Then the file is
      symlinked into ~/.config/nvim.${resetall}
 "
+
 confirm "${bold}Sounds good? [Y/n]${resetall}"
+
+if [ "$confirmValue" = true ]; then
+	echo -e "Then what are we waiting for?! Let's goo!"
+else
+	echo -e "Then we'll stop before we do something we'll both regret."
+	exit
+fi
 
 if [ "$EUID" -ne 0 ]
 then
@@ -97,40 +108,80 @@ section "Install build tools"
 sudo apt-get install -y ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip curl git | while read -r line; do formatter "$line"; done
 closeSection "Installed build tools"
 
-section "Cloning neovim's git repository"
-git clone https://github.com/neovim/neovim | while read -r line; do formatter "$line"; done
-closeSection "Cloned Neovim's git repository"
+if [ -d ./neovim/.git ]; then
+	section "Updating the already downloaded Neovim repository"
+	cd neovim
+	# TODO: This command leaks a bit for some reason... Can use the | while read trick
+	pullOutput=$(git pull origin stable)
 
-cd neovim
+	cd ..
 
-section "Selecting the stable branch"
-git checkout stable | while read -r line; do formatter "$line"; done
-closeSection "Selected stable branch"
+	# If the pull output contains: "Already up to date", then we don't have to rebuild
+	if [[ "$pullOutput" == *"Already up to date"* ]]; then
+		rebuild=false
+		closeSection "Already at the latest version!"
+	else
+		rebuild=true
+		closeSection "Update done!"
+	fi
+else
+	section "Cloning neovim's git repository"
+	git clone https://github.com/neovim/neovim | while read -r line; do formatter "$line"; done
+	closeSection "Cloned Neovim's git repository"
 
-section "Compiling the release version of neovim"
-# Set the type of build (Release/Debug/RelWIthDebInfo)
-# -j flag shouldn't be added if ninja is installed
-make CMAKE_BUILD_TYPE=Release | while read -r line; do formatter "$line"; done
-closeSection "Compile successfull"
+	section "Selecting the stable branch"
+	cd neovim
+	git checkout stable | while read -r line; do formatter "$line"; done
+	closeSection "Selected stable branch"
+fi
 
-section "Installing to /usr/local"
-sudo make install | while read -r line; do formatter "$line"; done
-closeSection "Installation completed without errors"
+if [ "$rebuild" = true ]; then
+	section "Compiling the release version of neovim"
+	# Set the type of build (Release/Debug/RelWIthDebInfo)
+	# -j flag shouldn't be added if ninja is installed
+	make CMAKE_BUILD_TYPE=Release | while read -r line; do formatter "$line"; done
+	closeSection "Compile successfull"
+
+	section "Installing to /usr/local"
+	sudo make install | while read -r line; do formatter "$line"; done
+	closeSection "Installation completed without errors"
+fi
 
 
 section "Configuring Neovim"
-git clone https://github.com/etokheim/nvim-config.git | while read -r line; do formatter "$line"; done
+if [ -d nvim-config/.git ]; then
+	cd nvim-config
+	git pull -q | while read -r line; do formatter "$line"; done
+	cd ..
+else
+	git clone https://github.com/etokheim/nvim-config.git | while read -r line; do formatter "$line"; done
+fi
 
 mkdir -p ~/.config/nvim
-cp nvim-config/init.vim ~/.config/nvim/
+
+# If there's a configuration file already present, ask the user if we should overwrite it
+if [ -L "$initPath" ] || [ -f "$initPath" ]; then
+	confirm "${resetall}${green}│${resetall}${bold}   There is already an existing config file for Neovim. Do you want to overwrite it? [Y/n]"
+
+	if [ "$confirmValue" = true ]; then
+		rm "$initPath"
+		ln -s "$newInitPath" "$initPath"
+		formatter "Successfully removed the old config"
+	else
+		formatter "Keeping existing config"
+	fi
+else
+	ln -s "${pwd}/$newInitPath" "$initPath"
+fi
 
 # Install vim-plug (plugin manager for vim/neovim)
-sh -c 'curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+sh -c 'curl --no-progress-meter -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+
 closeSection "Configuration done!"
 
 section "Successfully installed if build type is printed below"
-verifyMessage=./build/bin/nvim --version | grep ^Build
+verifyMessage=./neovim/build/bin/nvim --version | grep ^Build
 closeSection "$verifyMessage"
 
 section "Things to do:"
