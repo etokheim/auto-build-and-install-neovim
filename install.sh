@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
 # Dependencies
 source ./libcolor.bash
 
@@ -50,8 +53,6 @@ ${darkgrey}
      symlinked into ~/.config/nvim.${resetall}
 "
 confirm "${bold}Sounds good? [Y/n]${resetall}"
-
-exit
 
 echo ""
 echo ""
