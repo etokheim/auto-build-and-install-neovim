@@ -130,7 +130,7 @@ else
 
 	section "Selecting the stable branch"
 	cd neovim
-	git checkout stable | while read -r line; do formatter "$line"; done
+	git checkout -q stable | while read -r line; do formatter "$line"; done
 	closeSection "Selected stable branch"
 fi
 
@@ -153,7 +153,7 @@ if [ -d nvim-config/.git ]; then
 	git pull -q | while read -r line; do formatter "$line"; done
 	cd ..
 else
-	git clone https://github.com/etokheim/nvim-config.git | while read -r line; do formatter "$line"; done
+	git clone -q https://github.com/etokheim/nvim-config.git | while read -r line; do formatter "$line"; done
 fi
 
 mkdir -p ~/.config/nvim
@@ -170,7 +170,7 @@ if [ -L "$initPath" ] || [ -f "$initPath" ]; then
 		formatter "Keeping existing config"
 	fi
 else
-	ln -s "${pwd}/$newInitPath" "$initPath"
+	ln -s "$newInitPath" "$initPath"
 fi
 
 # Install vim-plug (plugin manager for vim/neovim)
