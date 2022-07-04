@@ -138,6 +138,7 @@ fi
 
 if [ "$rebuild" = true ]; then
 	section "Compiling the release version of neovim"
+	cd neovim
 	# Set the type of build (Release/Debug/RelWIthDebInfo)
 	# -j flag shouldn't be added if ninja is installed
 	make CMAKE_BUILD_TYPE=Release | while read -r line; do formatter "$line"; done
@@ -145,6 +146,7 @@ if [ "$rebuild" = true ]; then
 
 	section "Installing to /usr/local"
 	sudo make install | while read -r line; do formatter "$line"; done
+	cd ..
 	closeSection "Installation completed without errors"
 fi
 
@@ -194,9 +196,10 @@ else
 fi
 
 section "Things to do:"
-formatter "1. Re-source your PATH. Ie.: 'source ~/.bashrc'"
+formatter "1. Re-source your PATH. Ie.: 'source ~/.bashrc' so you can open Neovim"
 formatter "2. Open neovim (ie.: nvim [file]) and run ':PlugInstall' to install the plugins"
 formatter ""
-formatter "${italic}Don't delete this folder, as it now contains the Neovim configuration file (init.vim), which is symlinked to the correct location"
+formatter "${italics}Don't delete this folder, as it now contains the Neovim configuration file (init.vim), which is symlinked to the correct location${resetall}"
 closeSection "Have a nice day!"
+echo "" # Just a spacer
 
