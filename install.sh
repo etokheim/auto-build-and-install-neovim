@@ -46,7 +46,7 @@ section() {
 	echo -e "╭$spacers╮"
 	echo -e "│  $1  │"
 	echo -e "├$spacers╯"
-	echo -e "│"
+	echo -e "│${darkgrey}" 	# Sometimes useful to set color here
 }
 
 closeSection() {
@@ -131,6 +131,7 @@ else
 	section "Selecting the stable branch"
 	cd neovim
 	git checkout -q stable | while read -r line; do formatter "$line"; done
+	cd ..
 	closeSection "Selected stable branch"
 fi
 
