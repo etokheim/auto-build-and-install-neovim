@@ -8,6 +8,7 @@ source ./libcolor.bash
 
 # Config
 initPath=~/.config/nvim/init.vim
+initFolder=~/.config/nvim
 newInitPath=$(pwd)/nvim-config/init.vim
 
 # Make the user confirm an action.
@@ -160,13 +161,12 @@ else
 	git clone -q https://github.com/etokheim/nvim-config.git | while read -r line; do formatter "$line"; done
 fi
 
-mkdir -p ~/.config/nvim
-
-# If there's a configuration file already present, ask the user if we should overwrite it
-if [ -L "$initPath" ] || [ -f "$initPath" ]; then
+# If there's a configuration folder already present, ask the user if we should overwrite it
+if [ -d "$initFolder" ]; then
 	confirm "${resetall}${green}│${resetall}${bold}   There is already an existing config file for Neovim. Do you want to overwrite it? [Y/n]"
 
 	if [ "$confirmValue" = true ]; then
+		rm -rf "$initFolder/*"
 		rm "$initPath"
 		ln -s "$newInitPath" "$initPath"
 		formatter "Successfully removed the old config"
@@ -174,12 +174,13 @@ if [ -L "$initPath" ] || [ -f "$initPath" ]; then
 		formatter "Keeping existing config"
 	fi
 else
+	mkdir -p ~/.config/nvim
 	ln -s "$newInitPath" "$initPath"
 fi
 
 # Install vim-plug (plugin manager for vim/neovim)
-sh -c 'curl --no-progress-meter -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
-       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+# sh -c 'curl --no-progress-meter -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+#        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
 closeSection "Configuration done!"
 
