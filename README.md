@@ -15,3 +15,6 @@ This script automatically builds, installs and configures Neovim. It's made for 
     ```sh
     ./install.sh
     ```
+## TODO
+ 1. Move all confirm dialogs to the start, so the install can happen without anyone there
+ 2. Auto install Node and NPM if they are missing
