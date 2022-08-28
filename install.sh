@@ -163,7 +163,7 @@ fi
 
 # If there's a configuration folder already present, ask the user if we should overwrite it
 if [ -d "$initFolder" ]; then
-	ls -al "$initFolder"
+	ls -al "$initFolder" | while read -r line; do formatter "$line"; done
 	confirm "${resetall}${green}│${resetall}${bold}   There is already an existing config file for Neovim. Do you want to overwrite it? (See the config files above) [Y/n]"
 
 	if [ "$confirmValue" = true ]; then
@@ -191,7 +191,7 @@ pip install pynvim
 # Install npm and Node if they are missing
 if [[ ! $(which npm) ]]; then
 	section "Installing Node Version Manager (nvm)"
-	wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+	wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash | while read -r line; do formatter "$line"; done
 
 	# Load nvm without restarting the shell
 	export NVM_DIR="$HOME/.nvm"
