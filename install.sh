@@ -189,7 +189,7 @@ sudo apt-get install -y xsel ripgrep fd-find python3 python3-pip | while read -r
 pip install pynvim
 
 # Install npm and Node if they are missing
-if [[ $(which npm) ]]; then
+if [[ ! $(which npm) ]]; then
 	section "Installing Node Version Manager (nvm)"
 	wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 	
@@ -213,7 +213,6 @@ if [[ $(which npm) ]]; then
 	fi
 else
 	formatter "npm is already installed"
-	exit
 fi
 
 npm install -g neovim
