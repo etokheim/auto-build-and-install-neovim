@@ -10,6 +10,7 @@ source ./libcolor.bash
 initPath=~/.config/nvim/init.vim
 initFolder=~/.config/nvim
 newInitPath=$(pwd)/nvim-config/init.vim
+newInitFolder=$(pwd)/nvim-config
 
 # Make the user confirm an action.
 # Custom text can be passed in as the first parameter.
@@ -74,9 +75,8 @@ echo -e "${bold}This script will make the following changes to your system:${res
 ${darkgrey}
 1. apt-get update
 2. Install git and build tools needed for compiling Neovim
-3. Compile and install the stable version of Neovim
-4. Install vim-plug, a plugin manager for Vim/Neovim
-5. Download my init.vim file as a template for you.
+3. Compile and install/update to the latest stable version of Neovim (Release branch)
+4. Download my init.vim file as a template for you.
    - This init.vim file is in it's own git repository which is
      cloned into the auto-installer project. Then the file is
      symlinked into ~/.config/nvim.${resetall}
@@ -163,7 +163,8 @@ fi
 
 # If there's a configuration folder already present, ask the user if we should overwrite it
 if [ -d "$initFolder" ]; then
-	confirm "${resetall}${green}│${resetall}${bold}   There is already an existing config file for Neovim. Do you want to overwrite it? [Y/n]"
+	ls -al "$initFolder"
+	confirm "${resetall}${green}│${resetall}${bold}   There is already an existing config file for Neovim. Do you want to overwrite it? (See the config files above) [Y/n]"
 
 	if [ "$confirmValue" = true ]; then
 		rm -rf "$initFolder/*"
@@ -175,7 +176,7 @@ if [ -d "$initFolder" ]; then
 	fi
 else
 	mkdir -p ~/.config/nvim
-	ln -s "$newInitPath" "$initPath"
+	ln -s "$newInitFolder/*" "$initFolder"
 fi
 
 # Install vim-plug (plugin manager for vim/neovim)
@@ -183,6 +184,12 @@ fi
 #        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
 
 closeSection "Configuration done!"
+
+section "Installing Neovim plugin dependencies"
+sudo apt-get install -y xsel ripgrep fd-find | while read -r line; do formatter "$line"; done
+pip install pynvim
+npm install -g neovim
+closeSection "Plugin dependencies installed!"
 
 section "Verifying installation"
 verifyMessage=$(./neovim/build/bin/nvim --version | grep ^Build)
