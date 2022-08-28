@@ -192,6 +192,10 @@ pip install pynvim
 if [[ ! $(which npm) ]]; then
 	section "Installing Node Version Manager (nvm)"
 	wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+
+	# Load nvm without restarting the shell
+	export NVM_DIR="$HOME/.nvm"
+	[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 	
 	if [[ $(command -v nvm) ]]; then
 		closeSection "Successfully installed nvm"
@@ -201,12 +205,13 @@ if [[ ! $(which npm) ]]; then
 		nvm install node | while read -r line; do formatter "$line"; done
 		nvm use node | while read -r line; do formatter "$line"; done
 
-		if [[ $(which npm) ]]; then
-			closeSection "Successfully installed npm and Node"
-		else
-			formatter "Exiting: Failed to install npm and Node"
-			exit
-		fi
+		# TODO: Before we can verify the install, we need to reload the shell/resource the path...
+		# if [[ $(which npm) ]]; then
+		#	closeSection "Successfully installed npm and Node"
+		#else
+		#	formatter "Exiting: Failed to install npm and Node"
+		#	exit
+		#fi
 	else
 		formatter "Exiting: Failed to install nvm"
 		exit
