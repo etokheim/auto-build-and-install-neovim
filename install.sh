@@ -201,7 +201,7 @@ if [[ $(which npm) ]]; then
 		nvm install node | while read -r line; do formatter "$line"; done
 		nvm use node | while read -r line; do formatter "$line"; done
 
-		if [[ $(which npm)]]; then
+		if [[ $(which npm) ]]; then
 			closeSection "Successfully installed npm and Node"
 		else
 			formatter "Exiting: Failed to install npm and Node"
