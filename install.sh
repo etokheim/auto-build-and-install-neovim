@@ -105,7 +105,7 @@ sudo apt-get update -y | while read -r line; do formatter "$line"; done
 closeSection "Updated"
 
 section "Install build tools"
-sudo apt-get install -y ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip curl git | while read -r line; do formatter "$line"; done
+sudo apt-get install -y ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip curl git wget | while read -r line; do formatter "$line"; done
 closeSection "Installed build tools"
 
 if [ -d ./neovim/.git ]; then
@@ -186,8 +186,37 @@ fi
 closeSection "Configuration done!"
 
 section "Installing Neovim plugin dependencies"
-sudo apt-get install -y xsel ripgrep fd-find | while read -r line; do formatter "$line"; done
+sudo apt-get install -y xsel ripgrep fd-find python3 python3-pip | while read -r line; do formatter "$line"; done
 pip install pynvim
+
+# Install npm and Node if they are missing
+if [[ $(which npm) ]]; then
+	section "Installing Node Version Manager (nvm)"
+	wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+	
+	if [[ $(command -v nvm) ]]; then
+		closeSection "Successfully installed nvm"
+		
+		section "Installing npm and Node"
+
+		nvm install node | while read -r line; do formatter "$line"; done
+		nvm use node | while read -r line; do formatter "$line"; done
+
+		if [[ $(which npm)]]; then
+			closeSection "Successfully installed npm and Node"
+		else
+			formatter "Exiting: Failed to install npm and Node"
+			exit
+		fi
+	else
+		formatter "Exiting: Failed to install nvm"
+		exit
+	fi
+else
+	formatter "npm is already installed"
+	exit
+fi
+
 npm install -g neovim
 closeSection "Plugin dependencies installed!"
 
