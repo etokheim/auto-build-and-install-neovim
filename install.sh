@@ -168,8 +168,7 @@ if [ -d "$initFolder" ]; then
 
 	if [ "$confirmValue" = true ]; then
 		rm -rf "$initFolder/*"
-		rm "$initPath"
-		ln -s "$newInitPath" "$initPath"
+		ln -s "$newInitFolder/*" "$initFolder"
 		formatter "Successfully removed the old config"
 	else
 		formatter "Keeping existing config"
