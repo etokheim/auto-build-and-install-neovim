@@ -1,3 +1,5 @@
+⚠️⚠️ This is a work in progress, and won't work properly at the moment ⚠️⚠️
+
 # Automatically build and install Neovim
 This script automatically builds, installs and configures Neovim. It's made for Raspberry Pis, for which there isn't prebuilt images available, but runs perfectly on Ubuntu, and probably other Linux distributions.
 
